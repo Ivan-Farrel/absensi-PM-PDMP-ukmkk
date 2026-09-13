@@ -163,14 +163,15 @@
             // Ubah coretan kanvas jadi data teks (Base64)
             const ttdDataURL = signaturePad.toDataURL('image/png');
 
+            const formData = new FormData();
+            formData.append('nama', document.getElementById('nama').value);
+            formData.append('prodi', document.getElementById('prodi').value);
+            formData.append('tingkat', document.getElementById('tingkat').value);
+            formData.append('ttd', ttdDataURL);
+
             fetch(scriptURL, {
                 method: 'POST',
-                body: new URLSearchParams({
-                    nama: document.getElementById('nama').value,
-                    prodi: document.getElementById('prodi').value,
-                    tingkat: document.getElementById('tingkat').value,
-                    ttd: ttdDataURL // Kirim data tanda tangan
-                })
+                body: formData
             })
             .then(response => {
                 Swal.fire({
