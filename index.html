@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi PM & PDMP - UKMKK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .swal2-title, .swal2-html-container, .swal2-confirm {
+            font-family: 'Poppins', sans-serif !important;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-6 bg-slate-50 relative overflow-hidden">
+
+    <!-- Efek bias cahaya di belakang layar -->
+    <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-green-400/20 rounded-full blur-[80px] -z-10"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-72 h-72 bg-yellow-400/20 rounded-full blur-[80px] -z-10"></div>
+
+    <!-- Container Form -->
+    <div class="bg-white/50 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white w-full max-w-md relative z-10 mt-4 mb-4">
+
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-[#008751] to-[#76B947] bg-clip-text text-transparent">Absensi Kehadiran</h1>
+            <p class="text-gray-500 mt-1 text-sm font-medium">Kegiatan PM & PDMP UKMKK</p>
+            
+            <!-- SECTION LOGO (Baru) -->
+            <div class="flex justify-center items-center gap-4 mt-5">
+                <!-- Ganti src dengan nama file logo kamu -->
+                <img src="logo-unp.png" alt="UNP Kediri" class="h-9 w-auto brightness-0 opacity-70 hover:opacity-100 transition-opacity">
+                <img src="logo-ukmkk.png" alt="UKMKK" class="h-10 w-auto brightness-0 opacity-70 hover:opacity-100 transition-opacity">
+                <img src="logo-yoel.png" alt="Kegiatan" class="h-9 w-auto brightness-0 opacity-70 hover:opacity-100 transition-opacity">
+            </div>
+            <!-- Akhir Section Logo -->
+        </div>
+        
+        <form id="form-absen" class="space-y-5">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Nama Lengkap</label>
+                <input type="text" id="nama" name="nama" required placeholder="Masukkan nama lengkap..." 
+                    class="w-full rounded-2xl border border-white/60 bg-white/60 px-5 py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#76B947]/30 focus:bg-white focus:border-[#76B947] transition-all shadow-sm backdrop-blur-md">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Program Studi</label>
+                <select id="prodi" name="prodi" required 
+                    class="w-full rounded-2xl border border-white/60 bg-white/60 px-5 py-3.5 text-gray-800 focus:outline-none focus:ring-4 focus:ring-[#76B947]/30 focus:bg-white focus:border-[#76B947] transition-all shadow-sm backdrop-blur-md appearance-none cursor-pointer bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234B5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat pr-10">
+                    <option value="" disabled selected>Pilih Program Studi...</option>
+                    <option value="Pend. Ekonomi">1. Pend. Ekonomi</option>
+                    <option value="Akuntansi">2. Akuntansi</option>
+                    <option value="Manajemen">3. Manajemen</option>
+                    <option value="Pend. Bimbingan & Konseling">4. Pend. Bimbingan & Konseling</option>
+                    <option value="Pend. Sejarah">5. Pend. Sejarah</option>
+                    <option value="Pend. Pancasila & Kewarganegaraan">6. Pend. Pancasila & Kewarganegaraan</option>
+                    <option value="Pend. Bahasa & Sastra Indonesia">7. Pend. Bahasa & Sastra Indonesia</option>
+                    <option value="Pend. Bahasa Inggris">8. Pend. Bahasa Inggris</option>
+                    <option value="Pend. Guru Sekolah Dasar">9. Pend. Guru Sekolah Dasar</option>
+                    <option value="Pend. Guru Pendidikan Anak Usia Dini">10. Pend. Guru Pendidikan Anak Usia Dini</option>
+                    <option value="Kebidanan">11. Kebidanan</option>
+                    <option value="Keperawatan">12. Keperawatan</option>
+                    <option value="Peternakan">13. Peternakan</option>
+                    <option value="Pend. Biologi">14. Pend. Biologi</option>
+                    <option value="Pend. Matematika">15. Pend. Matematika</option>
+                    <option value="Pend. Jasmani Kesehatan & Rekreasi">16. Pend. Jasmani Kesehatan & Rekreasi</option>
+                    <option value="Sistem Informasi">17. Sistem Informasi</option>
+                    <option value="Teknik Informatika">18. Teknik Informatika</option>
+                    <option value="Teknik Mesin">19. Teknik Mesin</option>
+                    <option value="Teknik Industri">20. Teknik Industri</option>
+                    <option value="Teknik Elektronika">21. Teknik Elektronika</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">Tingkat / Semester</label>
+                <select id="tingkat" name="tingkat" required 
+                    class="w-full rounded-2xl border border-white/60 bg-white/60 px-5 py-3.5 text-gray-800 focus:outline-none focus:ring-4 focus:ring-[#76B947]/30 focus:bg-white focus:border-[#76B947] transition-all shadow-sm backdrop-blur-md appearance-none cursor-pointer bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234B5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25rem_1.25rem] bg-[position:right_1.25rem_center] bg-no-repeat pr-10">
+                    <option value="" disabled selected>Pilih Tingkat...</option>
+                    <option value="1">1</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="7">7</option>
+                    <option value=">8">>8</option>
+                </select>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" id="btn-submit" 
+                    class="w-full bg-gradient-to-r from-[#008751] to-[#76B947] hover:from-[#00683E] hover:to-[#5C9337] text-white font-bold py-4 px-4 rounded-2xl transition-all duration-300 shadow-[0_8px_20px_-6px_rgba(0,135,81,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(0,135,81,0.7)] hover:-translate-y-1 flex justify-center items-center">
+                    <span>Hadir & Simpan Data</span>
+                </button>
+            </div>
+            
+            <!-- SECTION CREDIT (Baru) -->
+            <div class="pt-4 text-center">
+                <p class="text-xs text-gray-400 font-medium tracking-wide">
+                    Crafted<span class="text-[#008751] animate-pulse inline-block"></span> by <span class="font-bold text-gray-500">Sie PDD</span>
+                </p>
+            </div>
+            <!-- Akhir Section Credit -->
+            
+        </form>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyurN8HD4Oizlc35i-yQjpkooROoXCxKny5DbVjgAQgwrYCz87VJbPge6EZENyVsqAl/exec'; 
+        
+        const form = document.getElementById('form-absen');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+            btnSubmit.disabled = true;
+            btnSubmit.classList.add('opacity-90', 'cursor-not-allowed');
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    nama: document.getElementById('nama').value,
+                    prodi: document.getElementById('prodi').value,
+                    tingkat: document.getElementById('tingkat').value
+                })
+            })
+            .then(response => {
+                Swal.fire({
+                    title: 'Mantap!',
+                    text: 'Kehadiranmu sudah tercatat.',
+                    icon: 'success',
+                    confirmButtonColor: '#008751',
+                    confirmButtonText: 'Sip',
+                    customClass: { popup: 'rounded-2xl' }
+                });
+
+                form.reset();
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-90', 'cursor-not-allowed');
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Waduh!',
+                    text: 'Koneksi error nih. Coba lagi ya.',
+                    icon: 'error',
+                    confirmButtonColor: '#E82544',
+                    confirmButtonText: 'Tutup',
+                    customClass: { popup: 'rounded-2xl' }
+                });
+
+                btnSubmit.innerHTML = originalText;
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-90', 'cursor-not-allowed');
+            });
+        });
+    </script>
+</body>
+</html>
