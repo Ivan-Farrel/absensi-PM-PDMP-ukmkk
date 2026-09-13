@@ -107,7 +107,7 @@
             
             <div class="pt-4 text-center">
                 <p class="text-xs text-gray-400 font-medium tracking-wide">
-                    Crafted<span class="text-[#008751] animate-pulse inline-block">💚</span> by <span class="font-bold text-gray-500">Sie PDD</span>
+                    Crafted<span class="text-[#008751] animate-pulse inline-block"></span> by <span class="font-bold text-gray-500">Sie PDD</span>
                 </p>
             </div>
             
@@ -161,32 +161,39 @@
 
             const ttdDataURL = signaturePad.toDataURL('image/png');
 
-            const formData = new FormData();
-            formData.append('nama', document.getElementById('nama').value);
-            formData.append('prodi', document.getElementById('prodi').value);
-            formData.append('tingkat', document.getElementById('tingkat').value);
-            formData.append('ttd', ttdDataURL);
+            // Bungkus data jadi teks JSON murni biar lolos sensor Google
+            const payloadData = JSON.stringify({
+                nama: document.getElementById('nama').value,
+                prodi: document.getElementById('prodi').value,
+                tingkat: document.getElementById('tingkat').value,
+                ttd: ttdDataURL
+            });
 
+            // Kirim pakai header text/plain (Jalur VVIP)
             fetch(scriptURL, {
                 method: 'POST',
-                mode: 'no-cors', // Mantra tembus blokir Google
-                body: formData
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: payloadData
             })
-            .then(() => {
-                Swal.fire({
-                    title: 'Mantap!',
-                    text: 'Kehadiran dan Tanda Tanganmu sudah tercatat.',
-                    icon: 'success',
-                    confirmButtonColor: '#008751',
-                    confirmButtonText: 'Sip',
-                    customClass: { popup: 'rounded-2xl' }
-                });
-
-                form.reset();
-                signaturePad.clear(); 
-                btnSubmit.innerHTML = originalText;
-                btnSubmit.disabled = false;
-                btnSubmit.classList.remove('opacity-90', 'cursor-not-allowed');
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === "success") {
+                    Swal.fire({
+                        title: 'Mantap!',
+                        text: 'Kehadiran dan Tanda Tanganmu sudah tercatat.',
+                        icon: 'success',
+                        confirmButtonColor: '#008751',
+                        confirmButtonText: 'Sip',
+                        customClass: { popup: 'rounded-2xl' }
+                    });
+                    form.reset();
+                    signaturePad.clear(); 
+                } else {
+                    // Lempar error kalau di sisi Google-nya bermasalah
+                    throw new Error(data.error); 
+                }
             })
             .catch(error => {
                 Swal.fire({
@@ -197,7 +204,9 @@
                     confirmButtonText: 'Tutup',
                     customClass: { popup: 'rounded-2xl' }
                 });
-
+            })
+            .finally(() => {
+                // Kembalikan tombol seperti semula baik pas sukses maupun gagal
                 btnSubmit.innerHTML = originalText;
                 btnSubmit.disabled = false;
                 btnSubmit.classList.remove('opacity-90', 'cursor-not-allowed');
