@@ -98,7 +98,7 @@
 
     <script>
         // MASUKKAN URL GOOGLE SCRIPT YANG BARU DI SINI
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbzSnhmpiVfynMy_V-n1NDqtjwHLBkFkKftbtrMEmgj7jVa2YR86A1_cFFFXopNlQBmM/exec'; 
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyAkg5uLgJbDC4VPY-l5wD5duH4IAcsibukvfWlhaLQh9cSWekuM-SvB4hFBm9FGUKj/exec'; 
         
         const form = document.getElementById('form-absen');
         const btnSubmit = document.getElementById('btn-submit');
@@ -129,7 +129,6 @@
             btnSubmit.disabled = true;
             btnSubmit.classList.add('opacity-90', 'cursor-not-allowed');
 
-            // Kita kirim gambar mentahnya aja ke Google Script
             const payloadData = JSON.stringify({
                 nama: document.getElementById('nama').value,
                 prodi: document.getElementById('prodi').value,
@@ -137,7 +136,7 @@
                 ttd: signaturePad.toDataURL('image/png')
             });
 
-            // Vercel kirim ke Google -> Google yg kirim ke Telegra.ph (Aman dari blokir!)
+            // Jalur VVIP ke Google Drive tanpa CORS Browser!
             fetch(scriptURL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
