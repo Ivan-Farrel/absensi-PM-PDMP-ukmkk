@@ -97,11 +97,7 @@
     </div>
 
     <script>
-        // URL SPREADSHEET KAMU YANG UDAH BENER
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwbYRJsbuoXaOHNkEAhxJiwCHD-X2vat7sUYII16yYDt6V1pBKge-HRWyZQrAYcJb1O/exec'; 
-        
-        // WAJIB GANTI: Masukkan API Key ImgBB di dalam tanda kutip ini
-        const imgbbAPIKey = '9b6a8d811e787073a34bdb832d1001ce'; 
         
         const form = document.getElementById('form-absen');
         const btnSubmit = document.getElementById('btn-submit');
@@ -134,27 +130,30 @@
             btnSubmit.classList.add('opacity-90', 'cursor-not-allowed');
 
             try {
-                // 1. UPLOAD GAMBAR KE IMGBB DULU
-                const base64Image = signaturePad.toDataURL('image/png').split(',')[1]; 
-                
-                const imgbbData = new FormData();
-                imgbbData.append('image', base64Image);
+                // 1. Ubah canvas TTD jadi file Blob
+                const dataURL = signaturePad.toDataURL('image/png');
+                const resBlob = await fetch(dataURL);
+                const blob = await resBlob.blob();
 
-                const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
+                // 2. Upload ke Telegra.ph (Tanpa API Key, Anti Blokir ISP)
+                const telegraphForm = new FormData();
+                telegraphForm.append('file', blob, 'ttd.png');
+
+                const uploadResponse = await fetch('https://telegra.ph/upload', {
                     method: 'POST',
-                    body: imgbbData
+                    body: telegraphForm
                 });
                 
-                const imgbbResult = await imgbbResponse.json();
+                const uploadResult = await uploadResponse.json();
                 
-                if (!imgbbResult.success) {
-                    throw new Error("Gagal mengupload tanda tangan. Pastikan API Key ImgBB benar.");
+                if (!uploadResult || !uploadResult[0] || !uploadResult[0].src) {
+                    throw new Error("Gagal mengupload tanda tangan ke server.");
                 }
                 
-                // Dapat link gambarnya
-                const imageUrl = imgbbResult.data.url;
+                // Gabungkan domain telegraph dengan path gambarnya
+                const imageUrl = 'https://telegra.ph' + uploadResult[0].src;
 
-                // 2. KIRIM LINK GAMBAR + DATA TEKS KE GOOGLE SPREADSHEET
+                // 3. Kirim data teks & link gambar ke Google Spreadsheet
                 const payloadData = JSON.stringify({
                     nama: document.getElementById('nama').value,
                     prodi: document.getElementById('prodi').value,
