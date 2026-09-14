@@ -97,9 +97,12 @@
     </div>
 
     <script>
-        // MASUKKAN URL GOOGLE SCRIPT YANG BARU DI SINI
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwpUto4iSLdgCsu9380gRgC7OFKRNO0_CPuweBFiPJy6WneLGwZ2rBoWsUw1MB-9mo5/exec'; 
+        // 1. MASUKKAN URL GOOGLE SCRIPT YANG BARU DI SINI
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzmr5S1M2Y2KVu2k3QzA89xNERIhqxHLflzb89NumlgTVv_jJUNQKnkfZ_C37czmmj0/exec'; 
         
+        // 2. MASUKKAN API KEY IMGBB LU DI SINI
+        const imgbbAPIKey = '9b6a8d811e787073a34bdb832d1001ce'; 
+
         const form = document.getElementById('form-absen');
         const btnSubmit = document.getElementById('btn-submit');
 
@@ -114,9 +117,12 @@
         resizeCanvas();
 
         const signaturePad = new SignaturePad(canvas, { penColor: "#0f172a" });
-        document.getElementById('clear-signature').addEventListener('click', () => signaturePad.clear());
 
-        form.addEventListener('submit', e => {
+        document.getElementById('clear-signature').addEventListener('click', () => {
+            signaturePad.clear();
+        });
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (signaturePad.isEmpty()) {
@@ -125,41 +131,58 @@
             }
             
             const originalText = btnSubmit.innerHTML;
-            btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+            btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
             btnSubmit.disabled = true;
             btnSubmit.classList.add('opacity-90', 'cursor-not-allowed');
 
-            const payloadData = JSON.stringify({
-                nama: document.getElementById('nama').value,
-                prodi: document.getElementById('prodi').value,
-                tingkat: document.getElementById('tingkat').value,
-                ttd: signaturePad.toDataURL('image/png')
-            });
+            try {
+                // TAHAP A: Upload Gambar ke ImgBB
+                const base64Image = signaturePad.toDataURL('image/png').split(',')[1]; 
+                const imgbbData = new FormData();
+                imgbbData.append('image', base64Image);
 
-            // Jalur VVIP ke Google Drive tanpa CORS Browser!
-            fetch(scriptURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: payloadData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result === 'success') {
-                    Swal.fire({ title: 'Mantap!', text: 'Kehadiran dan Tanda Tanganmu sudah tercatat.', icon: 'success', confirmButtonColor: '#008751', customClass: { popup: 'rounded-2xl' }});
-                    form.reset();
-                    signaturePad.clear(); 
-                } else {
-                    Swal.fire({ title: 'Error Google Apps!', text: data.error, icon: 'error', confirmButtonColor: '#E82544', customClass: { popup: 'rounded-2xl' }});
-                }
-            })
-            .catch(error => {
-                Swal.fire({ title: 'Gagal Kirim Jaringan!', text: error.message, icon: 'error', confirmButtonColor: '#E82544', customClass: { popup: 'rounded-2xl' }});
-            })
-            .finally(() => {
+                const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
+                    method: 'POST',
+                    body: imgbbData
+                });
+                const imgbbResult = await imgbbResponse.json();
+                
+                if (!imgbbResult.success) throw new Error("Gagal upload gambar ke ImgBB");
+                
+                // Ambil link asli
+                const originalUrl = imgbbResult.data.url;
+
+                // TAHAP B: JURUS PROXY CLOUDFLARE ANTI-BLOKIR ISP (Weserv)
+                // Ini yang bikin link gambar ImgBB lu tembus dibaca di jaringan Telkomsel/Indihome
+                const safeUrl = originalUrl.replace('https://', 'https://wsrv.nl/?url=');
+
+                // TAHAP C: Kirim Data Teks ke Google Sheets
+                const payloadData = JSON.stringify({
+                    nama: document.getElementById('nama').value,
+                    prodi: document.getElementById('prodi').value,
+                    tingkat: document.getElementById('tingkat').value,
+                    ttd_url: safeUrl
+                });
+
+                await fetch(scriptURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: payloadData
+                });
+
+                // Sukses Total
+                Swal.fire({ title: 'Mantap!', text: 'Kehadiran dan Tanda Tanganmu sudah tercatat.', icon: 'success', confirmButtonColor: '#008751', customClass: { popup: 'rounded-2xl' }});
+                form.reset();
+                signaturePad.clear();
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ title: 'Waduh!', text: 'Gagal mengirim data. Coba lagi.', icon: 'error', confirmButtonColor: '#E82544', customClass: { popup: 'rounded-2xl' }});
+            } finally {
                 btnSubmit.innerHTML = originalText;
                 btnSubmit.disabled = false;
                 btnSubmit.classList.remove('opacity-90', 'cursor-not-allowed');
-            });
+            }
         });
     </script>
 </body>
